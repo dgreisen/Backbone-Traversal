@@ -208,8 +208,10 @@
                         , args:this.args
                         }
         _.extend(trav_opts, options)
-        this.traverse(trav_opts);
+        var resp = this.traverse(trav_opts);
 
+        // if `traverse()` returns false, terminate traversal
+        if (resp===false) return
         // if we have not yet reached our destination
         if (options.path.length) {
           // visit children
