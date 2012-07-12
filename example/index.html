@@ -1,0 +1,102 @@
+<html>
+<head>
+  <title>Events</title>
+  <link href="./lib/bootstrap.css" rel="stylesheet">
+
+  <script type="text/javascript" src="./lib/jquery.js"></script>
+  <script type="text/javascript" src="./lib/underscore.js"></script>
+  <script type="text/javascript" src="./lib/backbone.js"></script>
+  <script type="text/javascript" src="../backbone-traversal.js"></script>
+  <script type="text/javascript" src="./lib/backbone-localstorage.js"></script>
+  <script type="text/javascript" src="./events.js"></script>
+</head>
+<body>
+
+
+
+<body id='root'>
+  <div class="navbar" id='navbar'>
+    <div class="navbar-inner">
+      <div class="container-fluid">
+        <a class="brand">Event Book</a>
+      </div>
+    </div>
+    <ul class="breadcrumb" id="breadcrumbs">
+      <li><a href="#" id='bc0'>Home</a> <span class="divider">/</span></li> 
+    </ul>
+  </div>
+
+  <div class="row">
+    <div class="span11 offset1" >
+      <h1 id="title" />
+    </div>
+  </div>
+  <div class="row">
+    <div id='content' class="span11 offset1" ></div>
+  </div>
+
+  <!-- template for root node -->
+  <script type="text/template" id="template-root">
+    <div id='root'>
+      <a class="btn" href="#events">Events</a>
+      <a class="btn" href="#contacts">Contacts</a>
+    </div>
+  </script>
+
+  <!-- template for events node -->
+  <script type="text/template" id="template-events">
+    <div id='events'>
+      <table class='table'>
+        <tr><th>Name</th><th>Date</th><th>Location</th></tr>
+        <% for (var i in collection.models) { m=collection.models[i]; %>
+          <tr>
+            <td><a href="<% print('#'+path.join('/')+'/'+m.get('id')) %>"><% print(m.get("name")) %></a></td>
+            <td><% print(m.get("date")) %></td>
+            <td><% print(m.get("location")) %></td>
+          </tr>
+        <% } %>
+      </table>
+    </div>
+  </script>
+
+  <!-- template for events node -->
+  <script type="text/template" id="template-contacts">
+    <div id='contacts'>
+      <table class='table'>
+        <tr><th>Name</th><th>Email</th>
+        <% for (var i in collection.models) {var m=collection.models[i]; %>
+          <tr>
+            <td><a href="<% print('#'+path.join('/')+'/'+m.get('id')) %>"><% print(m.get("name")) %></a></td>
+            <td><% print(m.get("email")) %></td>
+          </tr>
+        <% } %>
+      </table>
+    </div>
+  </script>
+
+  <!-- template for contact node -->
+  <script type="text/template" id="template-contact">
+    <div id='contact'>
+      <h3>Email:</h3>
+      <p><% print(model.get("email")) %></p>
+      <h3>Phone:</h3>
+      <p><% print(model.get("phone")) %></p>
+    </div>
+  </script>
+
+  <!-- template for event node -->
+  <script type="text/template" id="template-event">
+    <div id='event'>
+      <h3>Date:</h3>
+      <p><%- date %></p>
+      <h3>Location:</h3>
+      <p><%- location %></p>
+      <h3>Attendees:</h3>
+      <% for (var i in attendees) { var a = attendees[i]; %>
+        <p> <a href="#contacts/<% print(a.id) %>"><% print(a.name) %></a></p>
+      <% } %>
+    </div>
+  </script>
+
+</body>
+</html>
