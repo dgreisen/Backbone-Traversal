@@ -263,9 +263,15 @@
     // kwargs: keyword hash pulled from the regexed pathbit
     // path: the path, in Array form
     , render: function(options) {
+        var context = _.extend(options, this.getContext())
         var html = this.template(options);
         this.$el.html(html);
       }
+
+    // hook for adding custom context keys to the template call. 
+    , getContext: function() {}
+
+    // return a list of ancestors, root first, this last.
     , getAncestors: function() {
         if (this.parent) {
           var resp = this.parent.getAncestors();
