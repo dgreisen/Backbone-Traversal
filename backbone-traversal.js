@@ -111,7 +111,7 @@
           // `parent`
           this.children[i].parent = this;
           // `el`
-          if (!this.children[i].el) this.children[i].setElement(this.el, false);
+          if (!this.children[i].el) this.children[i].setElement(this.el);
           // `autoRender
           if (this.children[i].autoRender == null) {this.children[i].autoRender = this.autoRender;}
           // `_templater`
@@ -263,13 +263,13 @@
     // kwargs: keyword hash pulled from the regexed pathbit
     // path: the path, in Array form
     , render: function(options) {
-        var context = _.extend(options, this.getContext())
+        var context = _.extend(options, this.addContext())
         var html = this.template(options);
         this.$el.html(html);
       }
 
     // hook for adding custom context keys to the template call. 
-    , getContext: function() {}
+    , addContext: function() {}
 
     // return a list of ancestors, root first, this last.
     , getAncestors: function() {
