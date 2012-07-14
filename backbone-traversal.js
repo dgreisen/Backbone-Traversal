@@ -58,10 +58,13 @@
     // are specified, then the parent's `el` will be used
     , tagName: undefined
     
-    // if `autoRender` is null, it will try to inherit from its parent node.
-    // if `autoRender` null or true, then when a node is visited, it will be 
-    // rendered. if it is false, it will not be rendered.
-    , autoRender: null
+    // Whether to render template when traversal terminates at this node. 
+    // Inherits from `parent` if undefined
+    , autoRender: undefined
+
+    // The function for processing templates. Inherits from `parent` if 
+    // undefined
+    , _templater: undefined
         
     // Performs the initial configuration of a Node with a set of options. Keys 
     // with special meaning (model, collection, id, className), are attached 
@@ -95,28 +98,23 @@
           this.children = [this.children]
         }
 
-        // handle template - if `template` is a string, treat it as a 
-        // selector,get the html, and run it through the templating function
-        // `_templater`; _templater defaults to `_.template`.
-        if (typeof(this.template) == "string") {
-          var templater = this._templater || _.template
-          this.template = templater($(this.template).html())
-        }
-
       }
     
     // ensures inheritence occurs properly, as well as cleans up children 
     , _inheritance: function(root) {
+        // handle template - if `template` is a string, treat it as a 
+        // selector,get the html, and run it through the templating function
+        // `_templater`; _templater defaults to `_.template`.
+        if (typeof(this.template) == "string") {
+          this.template = this.get('_templater')($(this.template).html())
+        }
+
         for (i in this.children) {
           // `parent`
           this.children[i].parent = this;
           // `el`
           if (!this.children[i].el) this.children[i].setElement(this.el);
-          // `autoRender
-          if (this.children[i].autoRender == null) {this.children[i].autoRender = this.autoRender;}
-          // `_templater`
-          if (this.children[i]._templater == null) {this.children[i]._templater = this._templater;}
-          
+
           // proxy events
           this.children[i].on('all', root._onNodeEvent, root);
 
@@ -230,7 +228,7 @@
           // emit `visited` event
           this.trigger("visited", this);
           // unless overridden by setting `this.autoRender = false, call render
-          if (this.autoRender !== false) {
+          if (this.get('autoRender') !== false) {
             this.render({ model: this.model
                         , collection: this.collection
                         , args: this.args
@@ -282,13 +280,39 @@
           return [this]
         }
       }
+
+    // get(attr, inherit=true) get an attribute from this Node instance.
+    // 1) if getter exists, return getter value get prepended to a first-
+    // letter capitalized attribute. e.g. getter for `name` would be `getName`
+    // 2) if attr is undefined, and `inherit` is true call `parent.get`
+    // 3) otherwise, return attr value
+    // optional second parameter, `inherit` specifies whether to perform 
+    // inheritence lookup. defaults to true
+    , get: function(attr, inherit) {
+        inherit = (inherit===undefined) ? true : inherit;
+        var getter = 'get'+attr[0].toUpperCase()+attr.slice(1);
+        if (this[getter]) {
+          return this[getter]()
+        }
+        if (this[attr] === undefined && this.parent && inherit) {
+          return this.parent.get(attr);
+        }
+        return this[attr];
+      }
     })
   
   
   var RootNode = Backbone.RootNode = Backbone.Node.extend(
     { 
+
+    // _templater default - inherited by all child nodes unless overridden
+      _templater: _.template
+
+    // autoRender default -inherited by all child nodes unless overridden
+    , autRender: true
+
     // the current node
-      currentNode: null
+    , currentNode: null
 
     , _configure: function(options) {
         Backbone.Node.prototype._configure.call(this, options);
