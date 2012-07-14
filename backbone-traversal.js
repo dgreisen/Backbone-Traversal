@@ -109,6 +109,9 @@
           this.template = this.get('_templater')($(this.template).html())
         }
 
+        // add a reference to root
+        this.root = root;
+        
         for (i in this.children) {
           // `parent`
           this.children[i].parent = this;
@@ -220,7 +223,7 @@
           }
           // if no children successfully visited, throw event error
           if (!success) {
-            this.trigger("traversalError", this, options.path);
+            this.trigger("traversalError", this, options.path, options.pathParent);
           }
         }
         // if we have reached destination
