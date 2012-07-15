@@ -101,6 +101,8 @@
       }
     
     // ensures inheritence occurs properly, as well as cleans up children 
+    // if you need to do something after inheritence has been setup, create
+    // a function called `initialized` or `constructed`
     , _inheritance: function(root) {
         // handle template - if `template` is a string, treat it as a 
         // selector,get the html, and run it through the templating function
@@ -111,7 +113,7 @@
 
         // add a reference to root
         this.root = root;
-        
+
         for (i in this.children) {
           // `parent`
           this.children[i].parent = this;
@@ -126,6 +128,9 @@
           
 
         }
+
+        if (this.initialized) {this.initialized()}
+        else if (this.constructed) {this.constructed()}
       }
       
     // Ensure that the View has a DOM element to render into.
@@ -294,13 +299,22 @@
     , get: function(attr, inherit) {
         inherit = (inherit===undefined) ? true : inherit;
         var getter = 'get'+attr[0].toUpperCase()+attr.slice(1);
+        var resp = null
         if (this[getter]) {
-          return this[getter]()
+          resp = this[getter]()
         }
-        if (this[attr] === undefined && this.parent && inherit) {
-          return this.parent.get(attr);
+        else if (this[attr] === undefined && this.parent && inherit) {
+          resp = this.parent.get(attr);
         }
-        return this[attr];
+        else {
+          resp = this[attr];
+        }
+
+        if (resp instanceof Function) {
+          resp = jQuery.proxy(resp, this)
+        }
+
+        return resp
       }
     })
   
