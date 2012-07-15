@@ -294,24 +294,37 @@
     // letter capitalized attribute. e.g. getter for `name` would be `getName`
     // 2) if attr is undefined, and `inherit` is true call `parent.get`
     // 3) otherwise, return attr value
-    // optional second parameter, `inherit` specifies whether to perform 
-    // inheritence lookup. defaults to true
-    , get: function(attr, inherit) {
-        inherit = (inherit===undefined) ? true : inherit;
+    // optional second parameter, `opts` can contain:
+    // * `inherit`: whether to perform inheritence lookup. defaults to true
+    // * `proxy`: if return is a method - whether to bind to the 
+    // calling node (proxy == true) or to the ancestor node where the
+    //  method was defined (proxyd == false). defaults to true
+    , get: function(attr, opts, inner) {
+        opts = opts || {};
+        var inherit = (opts.inherit===undefined) ? true : opts.inherit;
+        var proxy = (opts.proxy===undefined) ? true : opts.proxy;
         var getter = 'get'+attr[0].toUpperCase()+attr.slice(1);
         var resp = null
         if (this[getter]) {
           resp = this[getter]()
+          if (resp instanceof Function && !proxy) {
+            resp = jQuery.proxy(resp, this);
+          }
         }
         else if (this[attr] === undefined && this.parent && inherit) {
-          resp = this.parent.get(attr);
+          resp = this.parent.get(attr, opts, true);
         }
         else {
           resp = this[attr];
+          if (resp instanceof Function && !proxy) {
+            resp = jQuery.proxy(resp, this);
+          }
         }
 
-        if (resp instanceof Function) {
-          resp = jQuery.proxy(resp, this)
+        // ensure any method is proxied to the child node that called the
+        // original `get`
+        if (resp instanceof Function && !inner && proxy) {
+          resp = jQuery.proxy(resp, this);
         }
 
         return resp
